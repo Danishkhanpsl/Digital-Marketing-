@@ -1,0 +1,123 @@
+<html>
+<head>
+    <title>Digital Marketing Task Notifier</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.3/dist/tailwind.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .retro-style {
+            background-color: #f3e5ab;
+            min-height: 100vh;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body class="retro-style flex flex-col justify-center items-center">
+    <h1 class="text-3xl font-bold mb-8 text-center">Digital Marketing Task Notifier</h1>
+    <form class="bg-white p-6 rounded shadow-md max-w-xl w-full">
+        <div class="mb-4">
+            <label for="task" class="block text-xl mb-2">Task to be completed</label>
+            <input type="text" id="task" class="w-full p-2 border border-gray-300 rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="deadline" class="block text-xl mb-2">Deadline for task</label>
+            <input type="date" id="deadline" class="w-full p-2 border border-gray-300 rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="frequency" class="block text-xl mb-2">Notification frequency</label>
+            <input type="text" id="frequency" class="w-full p-2 border border-gray-300 rounded" required>
+        </div>
+        <div class="mb-4">
+            <label for="email" class="block text-xl mb-2">Notification Email</label>
+            <input type="email" id="email" class="w-full p-2 border border-gray-300 rounded" required>
+        </div>
+        <button type="button" id="submitBtn" class="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 w-full">Let's Get Notified!</button>
+    </form>
+
+    <div id="pendingTasks" class="bg-white w-full max-w-xl p-4 mt-6 rounded shadow-md text-lg overflow-scroll">
+        <h2 class="font-bold text-xl mb-4">Pending Tasks</h2>
+        <ul id="taskList"></ul>
+    </div>
+
+    <div id="completedTasks" class="bg-white w-full max-w-xl p-4 mt-6 rounded shadow-md text-lg overflow-scroll">
+        <h2 class="font-bold text-xl mb-4">Completed Tasks</h2>
+        <ul id="completedList"></ul>
+    </div>
+
+    <footer class="mt-auto pb-4">
+        <a href="https://youtube.com/@danish85799?si=ZOHPW0DX2Al1Rlje" target="_blank" class="text-blue-600 underline">Made with ❤️</a>
+    </footer>
+
+    <script>
+        const taskList = document.getElementById('taskList');
+        const completedList = document.getElementById('completedList');
+
+        function loadTasks() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
+            renderTasks(taskList, tasks, false);
+            renderTasks(completedList, completedTasks, true);
+        }
+
+        function renderTasks(listElement, tasks, isCompleted) {
+            listElement.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = "mb-2";
+                li.innerHTML = `<span>${task.taskName} - Due: ${task.deadline} - Frequency: ${task.frequency} - Email: ${task.email}</span>
+                                <button class="bg-green-500 text-white p-1 rounded ml-2" onclick="markTaskAsCompleted(${index}, ${isCompleted})">${isCompleted ? 'Undo' : 'Complete'}</button>`;
+                listElement.appendChild(li);
+            });
+        }
+
+        function saveTasks(tasks, completedTasks) {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+        }
+
+        function markTaskAsCompleted(index, isCompleted) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            let completedTasks = JSON.parse(localStorage.getItem('completedTasks')) || [];
+
+            if (isCompleted) {
+                tasks.push(completedTasks[index]);
+                completedTasks.splice(index, 1);
+            } else {
+                completedTasks.push(tasks[index]);
+                tasks.splice(index, 1);
+            }
+
+            saveTasks(tasks, completedTasks);
+            loadTasks();
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const taskName = document.getElementById('task').value;
+            const deadline = document.getElementById('deadline').value;
+            const frequency = document.getElementById('frequency').value;
+            const email = document.getElementById('email').value;
+
+            const newTask = {
+                taskName,
+                deadline,
+                frequency,
+                email
+            };
+
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.push(newTask);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+
+            renderTasks(taskList, tasks, false);
+
+            // Simulate sending email logic
+            alert(`A notification will be sent to ${email} for the task: ${taskName}`);
+
+            document.querySelector('form').reset();
+        });
+
+        loadTasks();
+    </script>
+</body>
+</html>
